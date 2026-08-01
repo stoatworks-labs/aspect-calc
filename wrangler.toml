@@ -1,0 +1,23 @@
+# Cloudflare deployment for Aspect Calc.
+#
+# A static-assets-only Worker: no server code. The fleet does NOT use Cloudflare
+# Pages — `pages_build_output_dir` fails here with "Could not detect a directory
+# containing static files", which reads like a missing build step and is really
+# the wrong config key. Same shape as blend-calc and pixel-peeker.
+#
+# Cloudflare builds this one (it is plain Vite and it is the real tool, not a
+# recording, so there is nothing to capture ahead of time and dist/ stays out of
+# git). Build command in the Cloudflare project:
+#
+#   npm ci && npm run build
+#
+# `public/_headers` is copied into dist/ by Vite and carries the CSP and the
+# immutable-cache rule for hashed assets; the assets runtime honours it.
+#
+# `name` must match the Cloudflare project.
+
+name = "aspect-calc"
+compatibility_date = "2026-07-30"
+
+[assets]
+directory = "./dist"

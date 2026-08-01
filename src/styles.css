@@ -1,0 +1,533 @@
+/* Fleet palette, same tokens as blend-calc and pixel-peeker. */
+:root {
+  --navy-900: #0a1420;
+  --navy-800: #0d1b2a;
+  --navy-700: #132437;
+  --navy-600: #1b3047;
+  --line: #223c56;
+  --line-soft: #1a2e44;
+  --text: #e8eef5;
+  --text-dim: #93a8bd;
+  --text-faint: #64798f;
+  --accent: #4cc9f0;
+  --accent-dim: #2d8fb3;
+  --danger: #ef5d5d;
+  --warn: #f2b134;
+  --ok: #5ec98a;
+  --radius: 8px;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+
+  /* Read by the vendored support footer, which otherwise inherits page colour. */
+  --sw-support-accent: var(--accent);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--navy-900);
+  color: var(--text);
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------- chrome */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: var(--navy-800);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-wrap: wrap;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  font-size: 15px;
+}
+
+.brand em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--text-faint);
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+.brand-mark {
+  width: 28px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid var(--accent-dim);
+  background: linear-gradient(
+    90deg,
+    #bfbfbf 0 14.3%,
+    #bfbf00 14.3% 28.6%,
+    #00bfbf 28.6% 42.9%,
+    #00bf00 42.9% 57.1%,
+    #bf00bf 57.1% 71.4%,
+    #bf0000 71.4% 85.7%,
+    #0000bf 85.7% 100%
+  );
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--navy-700);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: var(--accent-dim);
+}
+
+.btn--quiet {
+  background: transparent;
+  color: var(--text-dim);
+}
+
+/* ---------------------------------------------------------------- layout */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(340px, 400px) minmax(0, 1fr);
+  gap: 20px;
+  padding: 20px;
+  align-items: start;
+  flex: 1;
+}
+
+@media (max-width: 940px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* On a narrow screen the picture is the point — put it first. */
+  .col--main {
+    order: -1;
+  }
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.intro {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------- panels */
+
+.panel {
+  background: var(--navy-800);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.panel--derived {
+  border-color: var(--accent-dim);
+  box-shadow: 0 0 0 1px rgba(76, 201, 240, 0.18);
+}
+
+.panel__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--navy-700);
+  border-bottom: 1px solid var(--line-soft);
+  flex-wrap: wrap;
+}
+
+.panel__head h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  flex: 1;
+}
+
+.panel__body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chip {
+  font-size: 11px;
+  border-radius: 999px;
+  padding: 2px 9px;
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.chip--out {
+  border-color: var(--accent-dim);
+  color: var(--accent);
+  background: rgba(76, 201, 240, 0.1);
+}
+
+.chip--btn {
+  cursor: pointer;
+  background: transparent;
+  font-family: inherit;
+}
+
+.chip--btn:hover {
+  border-color: var(--accent-dim);
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- fields */
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.grid2--out {
+  padding-top: 2px;
+  border-top: 1px dashed var(--line-soft);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field__label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field--out .field__label {
+  color: var(--text-faint);
+}
+
+.field__box {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--navy-900);
+  overflow: hidden;
+}
+
+.field--out .field__box {
+  background: transparent;
+  border-style: dashed;
+}
+
+.field__box:focus-within {
+  border-color: var(--accent);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: 500 14px/1 var(--mono);
+  padding: 8px 9px;
+  outline: none;
+}
+
+.input[readonly] {
+  color: var(--accent);
+  cursor: default;
+}
+
+.input.bad {
+  color: var(--danger);
+}
+
+.field__suffix {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 11px;
+  color: var(--text-faint);
+  background: var(--navy-700);
+  border-left: 1px solid var(--line-soft);
+}
+
+.field--out .field__suffix {
+  background: transparent;
+}
+
+.field__hint {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.unit,
+.preset {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11px;
+  padding: 0 2px;
+  cursor: pointer;
+  outline: none;
+}
+
+.preset {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: var(--navy-800);
+  /* Without a cap the select takes its intrinsic width from the longest option
+     ("4K full container — 4096x2160") and shoves the header onto two lines. */
+  max-width: 116px;
+}
+
+.unit option,
+.preset option,
+.preset optgroup {
+  background: var(--navy-800);
+  color: var(--text);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.check input {
+  accent-color: var(--accent);
+}
+
+.note {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-faint);
+}
+
+.note code {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--navy-900);
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+
+/* ---------------------------------------------------------------- segmented */
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.seg {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 11px;
+  padding: 4px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.seg + .seg {
+  border-left: 1px solid var(--line);
+}
+
+.seg.on {
+  background: var(--accent-dim);
+  color: #05131c;
+  font-weight: 650;
+}
+
+/* ---------------------------------------------------------------- viz */
+
+.viz {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 62vh;
+  font-family: var(--mono);
+}
+
+/* ---------------------------------------------------------------- results */
+
+.ratiocard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  background: var(--navy-800);
+  border: 1px solid var(--accent-dim);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.ratiocard--second {
+  border-color: var(--warn);
+}
+
+.ratiocard__main {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.ratiocard__big {
+  font: 700 34px/1.1 var(--mono);
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+
+.ratiocard--second .ratiocard__big {
+  color: var(--warn);
+}
+
+.ratiocard__caption {
+  font-size: 12.5px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.ratiocard__note {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.dim {
+  color: var(--text-faint);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+/* Scoped to the card: .col--main is itself a flex column, so an unscoped
+   `flex: 2 1 320px` here reads as a 320px HEIGHT basis with grow, and the
+   standalone stats block inflates to fill the page. */
+.ratiocard .stats {
+  flex: 2 1 320px;
+}
+
+.stats--wide {
+  background: var(--navy-800);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.stat {
+  min-width: 0;
+}
+
+.stat__label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+.stat__value {
+  font: 600 17px/1.3 var(--mono);
+  color: var(--text);
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.stat--accent .stat__value {
+  color: var(--accent);
+}
+
+.stat__sub {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin-top: 1px;
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------- alerts */
+
+.alert {
+  margin: 0;
+  border-radius: var(--radius);
+  padding: 10px 13px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  border: 1px solid var(--line);
+  background: var(--navy-800);
+  color: var(--text-dim);
+}
+
+.alert--warn {
+  border-color: var(--warn);
+  color: #f6d79a;
+  background: rgba(242, 177, 52, 0.08);
+}
+
+.alert--error {
+  border-color: var(--danger);
+  color: #f8b4b4;
+  background: rgba(239, 93, 93, 0.08);
+}
