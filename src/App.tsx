@@ -167,15 +167,38 @@ export default function App() {
     setTimeout(() => setCopied(''), 1600)
   }
 
-  const copyLink = async () => {
-    await navigator.clipboard.writeText(`${location.origin}${location.pathname}#${encodeState(state)}`)
-    flash('link')
+  /**
+   * `navigator.clipboard` is undefined on a non-secure origin — serving this
+   * off a LAN IP for a site crew is exactly when that bites, and an unguarded
+   * call there throws into a promise nobody is watching, leaving a button that
+   * silently does nothing. Fall back to the old execCommand path and, failing
+   * that, say so instead of pretending it worked.
+   */
+  const copy = async (text: string, what: string) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+      } else {
+        const ta = document.createElement('textarea')
+        ta.value = text
+        ta.style.position = 'fixed'
+        ta.style.opacity = '0'
+        document.body.appendChild(ta)
+        ta.select()
+        const ok = document.execCommand('copy')
+        document.body.removeChild(ta)
+        if (!ok) throw new Error('execCommand refused')
+      }
+      flash(what)
+    } catch {
+      flash('failed')
+    }
   }
 
-  const copySummary = async () => {
-    await navigator.clipboard.writeText(summaryText())
-    flash('summary')
-  }
+  const copyLink = () =>
+    copy(`${location.origin}${location.pathname}#${encodeState(state)}`, 'link')
+
+  const copySummary = () => copy(summaryText(), 'summary')
 
   function summaryText(): string {
     const L: string[] = []
@@ -236,10 +259,10 @@ export default function App() {
         </div>
         <div className="spacer" />
         <button type="button" className="btn" onClick={copyLink}>
-          {copied === 'link' ? 'Copied' : 'Copy link'}
+          {copied === 'link' ? 'Copied' : copied === 'failed' ? 'Copy blocked' : 'Copy link'}
         </button>
         <button type="button" className="btn" onClick={copySummary}>
-          {copied === 'summary' ? 'Copied' : 'Copy summary'}
+          {copied === 'summary' ? 'Copied' : copied === 'failed' ? 'Copy blocked' : 'Copy summary'}
         </button>
         <button
           type="button"
