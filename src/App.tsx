@@ -274,6 +274,11 @@ export default function App() {
         >
           Reset
         </button>
+        {/* Opens the shared About dialog — see public/about.js, which delegates
+            this attribute from the document, so nothing needs importing here. */}
+        <button type="button" className="btn btn--quiet" data-stoatworks-about>
+          About
+        </button>
       </header>
 
       <main className="layout">
