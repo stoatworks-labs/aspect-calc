@@ -7,7 +7,7 @@
  * what the sender saw and not what the recipient was last doing.
  */
 
-import { DEFAULT_STATE, type UiState } from '../types'
+import { DEFAULT_STATE, type SlideSolve, type UiState } from '../types'
 import type { DerivedGroup, PhysicalEntry } from './solve'
 import type { LengthUnit } from './units'
 
@@ -16,6 +16,7 @@ const STORAGE_KEY = 'aspect-calc/state/v1'
 const UNITS: LengthUnit[] = ['mm', 'cm', 'm', 'in', 'ftin']
 const GROUPS: DerivedGroup[] = ['resolution', 'physical', 'pitch']
 const ENTRIES: PhysicalEntry[] = ['wh', 'diagonal']
+const SLIDE_SOLVES: SlideSolve[] = ['size', 'resolution']
 
 /** Short keys — the hash is meant to be pasted, not parsed by a human. */
 const KEYS: Record<keyof UiState, string> = {
@@ -32,6 +33,11 @@ const KEYS: Record<keyof UiState, string> = {
   diagUnit: 'du',
   derived: 'g',
   physicalEntry: 'pe',
+  slideSolve: 'ss',
+  slideWidthText: 'sw',
+  slideHeightText: 'sh',
+  slideUnit: 'su',
+  slideDpiText: 'sd',
 }
 
 export function encodeState(s: UiState): string {
@@ -68,6 +74,16 @@ export function decodeState(hash: string): UiState | null {
     diagUnit: pick(p.get(KEYS.diagUnit), UNITS, DEFAULT_STATE.diagUnit),
     derived: pick(p.get(KEYS.derived), GROUPS, DEFAULT_STATE.derived),
     physicalEntry: pick(p.get(KEYS.physicalEntry), ENTRIES, DEFAULT_STATE.physicalEntry),
+    slideSolve: pick(p.get(KEYS.slideSolve), SLIDE_SOLVES, DEFAULT_STATE.slideSolve),
+    // The slide fields fall back to the DEFAULTS rather than to empty, unlike
+    // every field above. A link made before the slide section existed carries
+    // none of these keys, and decoding those to blanks would open a shared link
+    // with a dead slide panel. The cost is that deliberately clearing a slide
+    // field does not survive being shared, which is not a state worth sharing.
+    slideWidthText: text(KEYS.slideWidthText, DEFAULT_STATE.slideWidthText),
+    slideHeightText: text(KEYS.slideHeightText, DEFAULT_STATE.slideHeightText),
+    slideUnit: pick(p.get(KEYS.slideUnit), UNITS, DEFAULT_STATE.slideUnit),
+    slideDpiText: text(KEYS.slideDpiText, DEFAULT_STATE.slideDpiText),
   }
 }
 

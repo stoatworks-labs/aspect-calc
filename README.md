@@ -26,6 +26,9 @@ width and height back.
 - **Pixel pitch** in any direction: pitch from resolution and size, size from resolution and
   pitch, or resolution from size and pitch. Non-square pixels are reported, not averaged away.
 - **Diagonal and area**, always, in both measuring systems at once.
+- **PowerPoint slide sizes**, both directions — the slide size for a target resolution, or
+  the resolution a given slide size exports to. Handles the 56-inch cap, the 1-inch floor
+  and the 100 MP export ceiling, and gives you points and EMU alongside inches and cm.
 - **The display drawn to scale** with SMPTE-style colour bars and every dimension on it.
 
 ## Running it
@@ -36,7 +39,7 @@ npm run dev
 ```
 
 ```bash
-npm test          # 72 tests
+npm test          # 100 tests
 npm run build     # tsc -b && vite build -> dist/
 ```
 
@@ -54,6 +57,37 @@ both 21:9 and then tells you which one you have.
 **The colour bars are a picture, not a signal.** The pattern is stretched to whatever aspect
 you are looking at — which is what a real generator does — and the RGB values are the
 standard 75% bar values but are not colour-managed. Do not grade against it.
+
+## Notes on PowerPoint
+
+A slide is a display whose pixel pitch is fixed by the export DPI: `slide size × DPI =
+pixels`, and 96 dpi is a pitch of 0.265 mm. What makes it worth calculating is that
+PowerPoint adds three limits an LED wall does not have.
+
+**56 inches is a hard stop on either edge, and 1 inch is a hard floor.** A 7680-wide wall at
+96 dpi wants an 80-inch slide, which PowerPoint refuses. The answer is to build at half size
+and export at 200%, and the tool works out the divisor and the resulting export DPI for you.
+A shape steeper than 56:1 cannot be a PowerPoint slide at any scale, and it says so.
+
+**PowerPoint will not write a bitmap over 100 megapixels**, so the export DPI has its own
+ceiling of `sqrt(100,000,000 / (w × h))` with the slide in inches. On a 40 × 22.5 inch slide
+that is 333 dpi, whatever you put in `ExportBitmapResolution`.
+
+**PowerPoint's two 16:9 slide sizes are not the same size.** "Widescreen" is 13.333 × 7.5 in;
+"On-screen Show (16:9)" is 10 × 5.625 in, which is also what Google Slides defaults to. Both
+are exactly 16:9, and a deck moved between them has every point size on every slide wrong by
+a third. This is why the tool always reports a size and never just a ratio.
+
+**Usually you should not resize the deck at all.** For a 16:9 target the better answer is to
+leave the deck on Widescreen and raise the export DPI — 3840 px wide is just 288 dpi — which
+keeps every template, master and font size where it is. The tool offers that route whenever
+the ratio matches and the required DPI is a whole number, and withholds it when it is not,
+because `ExportBitmapResolution` is a DWORD and a rounded 102 dpi quietly delivers the wrong
+pixel count.
+
+**The dialog rounds, the file does not.** Widescreen is 40/3 inches — 12,192,000 EMU — and
+the "13.333" the dialog shows is a genuinely different slide at 12,191,695 EMU. The presets
+here carry the exact values.
 
 <!-- attributions:start -->
 This project is built on other people's work — see [ATTRIBUTIONS.md](ATTRIBUTIONS.md).

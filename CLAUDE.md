@@ -8,7 +8,7 @@ Command reference. For the model, the invariants and the traps, read
 ```bash
 npm install
 npm run dev          # vite dev server
-npm test             # vitest — 72 tests
+npm test             # vitest — 100 tests
 npm run test:watch
 npm run build        # tsc -b && vite build -> dist/
 npm run preview      # serve the built dist/ (does NOT apply _headers)
@@ -31,6 +31,10 @@ deploy `npx wrangler deploy`.
 
 - All lengths are **millimetres** inside the engine. Convert only in `units.ts` and the UI.
 - `solve.ts` owns `res × pitch = size`. Don't re-derive it anywhere else.
+- `slides.ts` owns `slide size × export DPI = pixels` and PowerPoint's limits. It is a
+  **separate calculator, not a fourth derived group** — don't fold it into `solve.ts`.
+- Slide presets carry **exact** inches, never the dialog's rounded decimals. Widescreen is
+  40/3 in / 12192000 EMU, and 13.333 is a different slide.
 - A reduced fraction is usually the wrong answer to show a person — `ratio.ts` explains why.
   Don't "simplify" the two-stage lookup into a single tolerance match.
 - Never grant `kind: 'exact'` to a whole-number input that didn't match a fraction exactly.

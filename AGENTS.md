@@ -22,6 +22,7 @@ src/
   lib/units.ts           mm in, mm out. Feet-and-inches parsing lives here
   lib/ratio.ts           reduction + NAMED-STANDARD matching. The interesting module
   lib/solve.ts           THE ENGINE. res x pitch = size, solved in any direction
+  lib/slides.ts          PowerPoint. slide size x export DPI = pixels, plus PPT's limits
   lib/presets.ts         resolution / pitch / diagonal starting points
   lib/urlstate.ts        hash + localStorage
   components/DisplayViz.tsx   the picture: one SVG, fixed coordinate space
@@ -44,6 +45,13 @@ resolution (px)  ×  pixel pitch (mm)  =  physical size (mm)
 
 Any two give the third. `solve.ts` names one of the three as the **derived group** and takes
 the other two as input. There is no fourth mode and no hidden coupling.
+
+`slides.ts` is the same relation with the pitch inverted — `dpi = 25.4 / pitch_mm` — but it
+is **deliberately not a fourth derived group**. It is a second, self-contained calculator
+that borrows the solved resolution and gives it back only when the user presses a button.
+Folding it into `solve.ts` would drag PowerPoint's 56-inch cap into the LED-wall engine,
+where it means nothing. Keep them apart. The UI reinforces this: the slide section is a card
+in the results column, not a fourth `Panel` in the solver trio.
 
 Diagonal and aspect ratio are **not** independent members of the system — they are another
 way of writing the physical size, which is why `physicalEntry: 'diagonal'` exists. When the
@@ -101,6 +109,49 @@ card. Do not collapse those two into one variable.
 `.col--main` is a flex **column**, so an unscoped `flex: 2 1 320px` on `.stats` reads as a
 320px *height* basis with grow, and the standalone stats block inflates to fill the page.
 The rule is scoped to `.ratiocard .stats` for that reason.
+
+### PowerPoint's two 16:9 slide sizes are different sizes
+
+"Widescreen" is 13.333 × 7.5 in. "On-screen Show (16:9)" is 10 × 5.625 in, which is also
+Google Slides' default. Both are **exactly** 16:9 and they are 4:3 apart in absolute size, so
+a deck built in one and resized to the other has every point size on every slide wrong by a
+third. Same species of trap as the two 21:9s in `ratio.ts`: the ratio is not the answer, the
+size is. There is a test holding them apart; do not merge them.
+
+### The Slide Size dialog rounds to three decimals, the file does not
+
+Widescreen is **40/3 inches = 12,192,000 EMU**. Typing the dialog's own "13.333" gives
+12,191,695 EMU, which is a genuinely different slide. `SLIDE_PRESETS` therefore carries
+`DEFAULT_DECK_WIDTH_IN` and not `13.333`, and `slideFieldText` writes **six** decimals into
+the input box because five does not round-trip back to 12,192,000. There is a test that
+round-trips every preset through its own field text. This is also why the slide rounding
+warning fires at a quarter of a pixel and not at `solve.ts`'s 0.005 — the last few
+thousandths of a pixel are the dialog's display rounding coming back, not an error anyone
+made, and nagging about it on the default state trains people to ignore the message.
+
+### 56 inches is a cap, 1 inch is a floor, and both at once is unsatisfiable
+
+`fitScale` expresses this as an interval — `s` must satisfy `s × longest ≤ 56` and
+`s × shortest ≥ 1` — which is empty exactly when the shape is steeper than 56:1. That case
+is an **error**, not a warning: no scale makes it a slide. Everything else gets a whole
+divisor or a whole multiplier, never 1/2.37, because "build at half and export at 200%" is
+an instruction someone can follow on site.
+
+### The export ceiling is on the bitmap, not on the DPI
+
+PowerPoint will not write over 100 megapixels, so `maxdpi = sqrt(1e8 / (w × h))` in inches.
+The check in the code is on the pixel count directly because that is the honest statement of
+the same constraint; `maxExportDpi` is reported alongside as the number people can act on.
+
+### Usually the right answer is not to resize the deck at all
+
+For a 16:9 target, leaving the deck on Widescreen and raising the export DPI keeps every
+template, master and font size intact — 3840 px wide is just 288 dpi. `standardDeckDpi`
+offers that route, and **withholds it in three cases**: when the ratio is not 16:9, when the
+slide already is the Widescreen deck (advice to change nothing), and when the required DPI is
+not a whole number. That last one matters: `ExportBitmapResolution` is a DWORD, 1366 px wide
+needs 102.45 dpi, and a helpfully rounded 102 delivers 1360 px that nobody notices until the
+wall is lit.
 
 ### The colour bars are a picture, not a signal
 

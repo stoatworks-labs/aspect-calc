@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Aspect ratio, pixel pitch and display geometry calculator — resolution, physical size, pitch and diagonal, solved in any direction, with named-standard ratio matching.",
+  "description": "Aspect ratio, pixel pitch and display geometry calculator — resolution, physical size, pitch and diagonal, solved in any direction, with named-standard ratio matching and PowerPoint slide sizing.",
   "license": "MIT",
   "scripts": {
     "dev": "vite",

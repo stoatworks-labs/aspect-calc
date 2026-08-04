@@ -9,8 +9,18 @@ import {
   type RatioMatch,
 } from './lib/ratio'
 import { PITCH_PRESETS, RESOLUTION_PRESETS } from './lib/presets'
+import {
+  DPI_PRESETS,
+  resolutionFromSlide,
+  slideFromResolution,
+  slideFieldText,
+  slideLabelText,
+  SLIDE_PRESETS,
+  toEmu,
+  toPoints,
+} from './lib/slides'
 import { pixelCount, solve, type DerivedGroup, type PhysicalEntry } from './lib/solve'
-import { altLength, formatLength, LENGTH_UNITS, parseLength, toUnitValue, type LengthUnit } from './lib/units'
+import { altLength, formatLength, LENGTH_UNITS, MM_PER_INCH, parseLength, toUnitValue, type LengthUnit } from './lib/units'
 import { encodeState, loadState, saveState } from './lib/urlstate'
 import { DEFAULT_STATE, type UiState } from './types'
 
@@ -31,10 +41,26 @@ function parsePitch(text: string): number | null {
   return n > 0 ? n : null
 }
 
+/** Dots per inch. Bounded because a typo of 96000 makes the page think for a while. */
+function parseDpi(text: string): number | null {
+  const s = text.replace(/[\s,]/g, '').replace(/dpi$/i, '')
+  if (!/^\d*\.?\d+$/.test(s)) return null
+  const n = Number(s)
+  return n > 0 && n <= 20000 ? n : null
+}
+
 function trim(n: number, dp: number): string {
   const s = n.toFixed(dp)
   return s.includes('.') ? s.replace(/\.?0+$/, '') : s
 }
+
+/**
+ * Slide inches to three places, which is what PowerPoint's own dialog shows and
+ * accepts. Two places turns the 13.333 in Widescreen default into 13.33, which
+ * is a different slide.
+ */
+const slideIn = (mm: number) => trim(mm / MM_PER_INCH, 3)
+const slideCm = (mm: number) => trim(mm / 10, 2)
 
 export default function App() {
   const [state, setState] = useState<UiState>(loadState)
@@ -152,6 +178,32 @@ export default function App() {
   const nonSquare =
     pixelRatio && physRatio && Math.abs(pixelRatio.value - physRatio.value) / physRatio.value > 0.002
 
+  // ------------------------------------------------------------------ slides
+  // A second calculator on the same page, sharing only the resolution. It is
+  // deliberately NOT a fourth derived group: `slide size x export DPI = pixels`
+  // is the same relation with the pitch inverted, but PowerPoint's 56 inch cap
+  // and 100 MP export ceiling have no business inside `solve.ts`.
+  const slideDpi = useMemo(() => parseDpi(state.slideDpiText), [state.slideDpiText])
+  const slideWidthMm = useMemo(
+    () => parseLength(state.slideWidthText, state.slideUnit),
+    [state.slideWidthText, state.slideUnit],
+  )
+  const slideHeightMm = useMemo(
+    () => parseLength(state.slideHeightText, state.slideUnit),
+    [state.slideHeightText, state.slideUnit],
+  )
+  const slide = useMemo(
+    () =>
+      state.slideSolve === 'size'
+        ? slideFromResolution(sol.hPixels, sol.vPixels, slideDpi)
+        : resolutionFromSlide(slideWidthMm, slideHeightMm, slideDpi),
+    [state.slideSolve, sol.hPixels, sol.vPixels, slideDpi, slideWidthMm, slideHeightMm],
+  )
+  const slideSizeDerived = state.slideSolve === 'size'
+
+  /** Note from the last preset picked. Not persisted — it explains a click. */
+  const [presetNote, setPresetNote] = useState('')
+
   // ------------------------------------------------------------- persistence
   useEffect(() => {
     saveState(state)
@@ -220,6 +272,19 @@ export default function App() {
     }
     const px = pixelCount(sol.hPixels, sol.vPixels)
     if (px) L.push(`Total pixels: ${px.toLocaleString('en-GB')} (${(px / 1e6).toFixed(2)} MP)`)
+    if (slide) {
+      L.push('')
+      L.push(`PowerPoint slide: ${slideIn(slide.buildWidthMm)}" x ${slideIn(slide.buildHeightMm)}"`)
+      L.push(`                  ${slideCm(slide.buildWidthMm)} x ${slideCm(slide.buildHeightMm)} cm`)
+      L.push(`Export at: ${trim(slide.buildDpi, 2)} dpi -> ${slide.hPixels} x ${slide.vPixels} px`)
+      if (slide.buildScale !== 1) {
+        L.push(`NOTE: built at ${trim(slide.buildScale, 4)}x full size — ${slideIn(slide.widthMm)}" x ${slideIn(slide.heightMm)}" is outside PowerPoint's limits.`)
+      }
+      L.push(`Type scale: ${trim(slide.typeScale, 3)}x the Widescreen default`)
+      if (slide.standardDeckDpi) {
+        L.push(`Or: leave the deck at Widescreen and export at ${slide.standardDeckDpi} dpi.`)
+      }
+    }
     return L.join('\n')
   }
 
@@ -659,12 +724,245 @@ export default function App() {
               }
             />
           </section>
+
+          <section className="slidecard">
+            <header className="slidecard__head">
+              <h2>PowerPoint slide</h2>
+              <Segmented
+                label="Which side of the slide calculation to solve for"
+                value={state.slideSolve}
+                onChange={(v) => {
+                  setPresetNote('')
+                  set({ slideSolve: v })
+                }}
+                options={[
+                  {
+                    id: 'size',
+                    label: 'Size from resolution',
+                    title: 'Take the resolution above and give the slide size to type into PowerPoint',
+                  },
+                  {
+                    id: 'resolution',
+                    label: 'Resolution from size',
+                    title: 'Type a slide size and get the pixels it exports to',
+                  },
+                ]}
+              />
+              {!slideSizeDerived ? (
+                <select
+                  className="preset"
+                  value=""
+                  aria-label="Slide size preset"
+                  onChange={(e) => {
+                    // Keyed by index, not by the dimensions: Letter, Overhead and
+                    // On-screen Show (4:3) are all 10 x 7.5 and are three
+                    // different entries with three different things to say.
+                    const item = SLIDE_PRESETS.flatMap((g) => g.items)[Number(e.target.value)]
+                    if (!item) return
+                    setPresetNote(item.note ?? '')
+                    set({
+                      slideUnit: 'in',
+                      slideWidthText: slideFieldText(item.wIn),
+                      slideHeightText: slideFieldText(item.hIn),
+                    })
+                  }}
+                >
+                  <option value="">preset…</option>
+                  {(() => {
+                    let i = -1
+                    return SLIDE_PRESETS.map((g) => (
+                      <optgroup key={g.group} label={g.group}>
+                        {g.items.map((p) => {
+                          i += 1
+                          return (
+                            <option key={`${g.group}/${p.label}`} value={i}>
+                              {p.label} — {slideLabelText(p.wIn)}&times;{slideLabelText(p.hIn)}″
+                            </option>
+                          )
+                        })}
+                      </optgroup>
+                    ))
+                  })()}
+                </select>
+              ) : null}
+            </header>
+
+            <div className="slidecard__body">
+              <div className="slideinputs">
+                {slideSizeDerived ? (
+                  <Field
+                    label="Resolution"
+                    readOnly
+                    suffix="px"
+                    value={
+                      sol.hPixels && sol.vPixels ? `${sol.hPixels} × ${sol.vPixels}` : ''
+                    }
+                    hint="from the panels above"
+                  />
+                ) : (
+                  <>
+                    <Field
+                      label="Slide width"
+                      inputMode="text"
+                      value={state.slideWidthText}
+                      invalid={state.slideWidthText !== '' && slideWidthMm === null}
+                      onChange={(v) => {
+                        setPresetNote('')
+                        set({ slideWidthText: v })
+                      }}
+                      suffix={
+                        <select
+                          className="unit"
+                          value={state.slideUnit}
+                          aria-label="Slide size unit"
+                          onChange={(e) => set({ slideUnit: e.target.value as LengthUnit })}
+                        >
+                          {/* Inches, centimetres, millimetres. PowerPoint's dialog
+                              offers no others and nobody sizes a slide in feet. */}
+                          {LENGTH_UNITS.filter((u) => u.id === 'in' || u.id === 'cm' || u.id === 'mm').map(
+                            (u) => (
+                              <option key={u.id} value={u.id}>
+                                {u.label}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                      }
+                    />
+                    <Field
+                      label="Slide height"
+                      inputMode="text"
+                      value={state.slideHeightText}
+                      invalid={state.slideHeightText !== '' && slideHeightMm === null}
+                      onChange={(v) => {
+                        setPresetNote('')
+                        set({ slideHeightText: v })
+                      }}
+                      suffix={state.slideUnit === 'in' ? '″' : state.slideUnit}
+                    />
+                  </>
+                )}
+                <Field
+                  label="Export DPI"
+                  suffix="dpi"
+                  list="dpi-presets"
+                  value={state.slideDpiText}
+                  invalid={state.slideDpiText !== '' && slideDpi === null}
+                  onChange={(v) => set({ slideDpiText: v })}
+                  hint="96 unless you changed ExportBitmapResolution"
+                />
+              </div>
+
+              {presetNote ? <p className="note">{presetNote}</p> : null}
+
+              {slide ? (
+                <>
+                  <div className="slidecard__answer">
+                    <div className="slidecard__big">
+                      {slideIn(slide.buildWidthMm)}″ × {slideIn(slide.buildHeightMm)}″
+                    </div>
+                    <div className="slidecard__caption">
+                      {slideCm(slide.buildWidthMm)} × {slideCm(slide.buildHeightMm)} cm ·{' '}
+                      <span className="dim">Design &rsaquo; Slide Size &rsaquo; Custom</span>
+                    </div>
+                  </div>
+
+                  <div className="stats">
+                    <Stat
+                      label="Resolution"
+                      value={`${slide.hPixels.toLocaleString('en-GB')} × ${slide.vPixels.toLocaleString('en-GB')}`}
+                      sub={`${((slide.hPixels * slide.vPixels) / 1e6).toFixed(2)} MP`}
+                      tone={slideSizeDerived ? undefined : 'accent'}
+                    />
+                    <Stat
+                      label="Export at"
+                      value={`${trim(slide.buildDpi, 2)} dpi`}
+                      sub={`ceiling ${slide.maxExportDpi.toLocaleString('en-GB')} dpi for this slide`}
+                      tone={slideSizeDerived ? 'accent' : undefined}
+                    />
+                    <Stat
+                      label="Points"
+                      value={`${trim(toPoints(slide.buildWidthMm), 1)} × ${trim(toPoints(slide.buildHeightMm), 1)}`}
+                      sub="the units a .pptx measures type in"
+                    />
+                    <Stat
+                      label="EMU"
+                      value={`${toEmu(slide.buildWidthMm).toLocaleString('en-GB')} × ${toEmu(slide.buildHeightMm).toLocaleString('en-GB')}`}
+                      sub="what <p:sldSz> holds"
+                    />
+                    <Stat
+                      label="Type scale"
+                      value={`${trim(slide.typeScale, 3)}×`}
+                      sub="vs the 13.333″ Widescreen default"
+                      tone={slide.typeScale > 2 || slide.typeScale < 0.5 ? 'warn' : undefined}
+                    />
+                  </div>
+
+                  {slide.problems.map((p, i) => (
+                    <p key={i} className={`alert alert--${p.level}`}>
+                      {p.text}
+                    </p>
+                  ))}
+
+                  {slide.standardDeckDpi ? (
+                    <p className="alert alert--info">
+                      This is 16:9, so you do not have to resize the deck at all — leave it on
+                      Widescreen (13.333″ × 7.5″) and export at{' '}
+                      <strong>{slide.standardDeckDpi} dpi</strong> instead. Same{' '}
+                      {slide.hPixels.toLocaleString('en-GB')} ×{' '}
+                      {slide.vPixels.toLocaleString('en-GB')} px out, and every template, master
+                      and point size stays exactly where it is.
+                    </p>
+                  ) : null}
+
+                  {Math.abs(slide.typeScale - 1) > 0.02 ? (
+                    <p className="note">
+                      The slide above is {trim(slide.typeScale, 2)}× the width of a standard
+                      Widescreen deck, so type has to scale with it: a 44&nbsp;pt title becomes{' '}
+                      {trim(44 * slide.typeScale, 0)}&nbsp;pt to look the same. Pasting from a
+                      normal deck will not do that for you.
+                    </p>
+                  ) : null}
+
+                  {!slideSizeDerived ? (
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => {
+                        touch('resolution')
+                        set({ hPixels: String(slide.hPixels), vPixels: String(slide.vPixels) })
+                      }}
+                    >
+                      Use {slide.hPixels} × {slide.vPixels} as the resolution above
+                    </button>
+                  ) : null}
+                </>
+              ) : (
+                <p className="alert alert--info">
+                  {slideSizeDerived
+                    ? 'Needs a resolution above and an export DPI.'
+                    : 'Needs a slide width, a height and an export DPI.'}
+                </p>
+              )}
+
+              <p className="note">
+                A slide is a display whose pixel pitch is fixed by the export DPI —{' '}
+                <code>96 dpi</code> is a pitch of 0.265&nbsp;mm. PowerPoint caps an edge at{' '}
+                <strong>56″</strong>, floors it at 1″, and will not write a bitmap over 100&nbsp;MP.
+              </p>
+            </div>
+          </section>
         </div>
       </main>
 
       <datalist id="pitch-presets">
         {PITCH_PRESETS.map((p) => (
           <option key={p} value={p} />
+        ))}
+      </datalist>
+      <datalist id="dpi-presets">
+        {DPI_PRESETS.map((d) => (
+          <option key={d} value={d} />
         ))}
       </datalist>
       <datalist id="ratio-presets">
