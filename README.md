@@ -55,6 +55,10 @@ both 21:9 and then tells you which one you have.
 you are looking at — which is what a real generator does — and the RGB values are the
 standard 75% bar values but are not colour-managed. Do not grade against it.
 
+<!-- attributions:start -->
+This project is built on other people's work — see [ATTRIBUTIONS.md](ATTRIBUTIONS.md).
+<!-- attributions:end -->
+
 ## Licence
 
 MIT. Part of [Stoatworks Labs](https://stoatworks-labs.com).
