@@ -1,5 +1,13 @@
 # Aspect Calc
 
+> **AI-assisted project.** This codebase was created with [Claude Code](https://claude.com/claude-code)
+> (Anthropic), directed and reviewed by a human author. The arithmetic is pinned by 100 tests,
+> including the ratio-naming rules that are the only part with judgement in them — that 3440×1440
+> is reported as 21:9 rather than its exact reduction 43:18, and that 1366×768 is never called
+> exactly 16:9 however close it lands. The PowerPoint sizing follows the format's own 56-inch slide
+> limit. Nothing here has been checked by measuring a real screen, because there is nothing to
+> measure: it is arithmetic over the numbers you type, and it is only as right as they are.
+
 An aspect ratio, pixel pitch and display geometry calculator for people who put pictures on
 walls. Browser only — no account, no backend, nothing you type leaves the tab.
 
