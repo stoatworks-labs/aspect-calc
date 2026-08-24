@@ -168,3 +168,10 @@ the bottom blocks do not line up with the bars above them.
   rule of thumb is a rule of thumb, not a calculation, and it varies by content and by
   vendor. Out of scope on purpose.
 - **No PDF export.** Not asked for. `Copy summary` puts the numbers on the clipboard.
+
+## Notes
+
+`docs/NOTES.md` carries this repo's working notes — current status, decisions
+already made, and the traps that have actually bitten. Read it before changing
+anything non-obvious. Cross-cutting fleet knowledge lives in
+[fleet-notes](https://github.com/stoatworks-labs/fleet-notes).
