@@ -97,6 +97,36 @@ pixel count.
 the "13.333" the dialog shows is a genuinely different slide at 12,191,695 EMU. The presets
 here carry the exact values.
 
+<!-- selfhost:start -->
+## Run your own copy
+
+Aspect Calc is a static page, so hosting it yourself is one container serving
+the built files — the same files the hosted copy serves, running somewhere that
+still works when the venue has no internet.
+
+**Docker.** The image is built by this repo's `docker.yml` workflow on every
+push and published as `ghcr.io/stoatworks-labs/aspect-calc`:
+
+```bash
+docker run -d --name aspect-calc --restart unless-stopped -p 8520:80 ghcr.io/stoatworks-labs/aspect-calc:latest
+```
+
+Or `docker compose up -d` with the [`docker-compose.yml`](docker-compose.yml)
+in this repo, which maps the same port. Either way it is then at
+`http://localhost:8520/`.
+
+**Unraid.** Search Community Applications for *Aspect Calc* — the template is
+[`templates/aspect-calc.xml`](https://github.com/stoatworks-labs/stoatworks-unraid/blob/main/templates/aspect-calc.xml)
+in [stoatworks-unraid](https://github.com/stoatworks-labs/stoatworks-unraid), which is what the CA feed reads.
+
+**Stoatworks Burrow** lists it under *Self-hosted*, with the compose file a
+click away.
+
+The `Dockerfile`, `docker-compose.yml`, `docker/` and the workflow are
+generated from `fleet.json` in stoatworks-unraid. Change them there and
+regenerate rather than editing them here.
+<!-- selfhost:end -->
+
 <!-- attributions:start -->
 This project is built on other people's work — see [ATTRIBUTIONS.md](ATTRIBUTIONS.md).
 <!-- attributions:end -->
