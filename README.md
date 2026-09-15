@@ -21,6 +21,10 @@ Give it any two and it calculates the third. Diagonal and aspect ratio are two m
 writing the physical size, so you can also hand it a 55" diagonal and "16:9" and get the
 width and height back.
 
+![Aspect Calc with 3440 × 1440 at a 2.6 mm pitch entered: the named ratio, the physical size, the display drawn to scale and the PowerPoint slide size](docs/screenshots/aspect-calc.png)
+
+<sub>3440 × 1440 at a 2.6 mm pitch: an 8.944 m wall, the ratio named 21:9 with its exact 43:18 beside it, the display drawn to scale with every dimension on it, and the PowerPoint slide size (35.833″ × 15″) that exports to that resolution.</sub>
+
 ## What it does
 
 - **Aspect ratio from anything** — a resolution in pixels, a physical size in mm/cm/m,
