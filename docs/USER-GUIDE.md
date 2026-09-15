@@ -3,6 +3,10 @@
 Aspect Calc is **an aspect ratio, pixel pitch and display geometry calculator for people who put
 pictures on walls**. Browser only — no account, no backend, nothing you type leaves the tab.
 
+![Aspect Calc with 3440 × 1440 at a 2.6 mm pitch entered: the named ratio, the physical size, the display drawn to scale and the PowerPoint slide size](screenshots/aspect-calc.png)
+
+*3440 × 1440 at a 2.6 mm pitch: an 8.944 m wall, the ratio named 21:9 with its exact 43:18 beside it, the display drawn to scale with every dimension on it, and the PowerPoint slide size (35.833″ × 15″) that exports to that resolution.*
+
 The whole model is one relation:
 
 ```
