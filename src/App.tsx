@@ -344,6 +344,9 @@ export default function App() {
         <button type="button" className="btn btn--quiet" data-stoatworks-about>
           About
         </button>
+        <a className="topbar-link" href="https://stoatworks-labs.com/web-tools/aspect-calc/" target="_blank" rel="noopener">
+          stoatworks-labs.com
+        </a>
       </header>
 
       <main className="layout">

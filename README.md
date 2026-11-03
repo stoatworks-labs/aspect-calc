@@ -12,6 +12,8 @@ An aspect ratio, pixel pitch and display geometry calculator for people who put 
 It runs in the browser only. There's no account and no backend, and nothing you type leaves the
 tab.
 
+It's live at [aspect-calc.stoatworks-labs.com](https://aspect-calc.stoatworks-labs.com). There's more on [its page at stoatworks-labs.com](https://stoatworks-labs.com/web-tools/aspect-calc/), along with the [user guide](https://stoatworks-labs.com/software/aspect-calc/guide/) and [notes on running it on your own server](https://stoatworks-labs.com/web-tools/self-hosting/).
+
 The whole model is one relation:
 
 ```

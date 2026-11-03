@@ -1,0 +1,16 @@
+# Aspect Calc
+
+> Ratio, pitch, size and PowerPoint slides
+
+An aspect ratio, pixel pitch and display geometry calculator that runs entirely in the browser. Resolution × pixel pitch = physical size, so any two give you the third. It names ratios the way the trade does, so 3440×1440 is 21:9 rather than 43:18, and it'll tell you 1366×768 is 0.049% off 16:9 instead of pretending it's spot on. It sizes PowerPoint slides on the same arithmetic, works round the 56-inch slide limit, and tells you when the better answer is to leave the deck alone and raise the export DPI.
+
+It's a Stoatworks Labs web tool: free, and it runs in a web browser.
+
+## Links
+
+- [Aspect Calc, the app](https://aspect-calc.stoatworks-labs.com/): runs in the browser, free
+- [Project page](https://stoatworks-labs.com/software/aspect-calc/)
+- [Web tool page](https://stoatworks-labs.com/web-tools/aspect-calc/)
+- [User guide](https://stoatworks-labs.com/software/aspect-calc/guide/)
+- [Source on GitHub](https://github.com/stoatworks-labs/aspect-calc)
+- [Self-hosting](https://stoatworks-labs.com/web-tools/self-hosting/): run it on your own server
