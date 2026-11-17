@@ -315,9 +315,9 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          <span className="brand-mark" aria-hidden="true" />
+      <header className="topbar sw-bar">
+        <div className="brand sw-brand">
+          <span className="sw-mark" aria-hidden="true">▬</span>
           <span>
             Aspect Calc <em>Stoatworks Labs</em>
           </span>
@@ -339,14 +339,14 @@ export default function App() {
         >
           Reset
         </button>
+        <a className="topbar-link" href="https://stoatworks-labs.com/web-tools/aspect-calc/" target="_blank" rel="noopener">
+          stoatworks-labs.com
+        </a>
         {/* Opens the shared About dialog — see public/about.js, which delegates
             this attribute from the document, so nothing needs importing here. */}
         <button type="button" className="btn btn--quiet" data-stoatworks-about>
           About
         </button>
-        <a className="topbar-link" href="https://stoatworks-labs.com/web-tools/aspect-calc/" target="_blank" rel="noopener">
-          stoatworks-labs.com
-        </a>
       </header>
 
       <main className="layout">

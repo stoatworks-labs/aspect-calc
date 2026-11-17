@@ -1,25 +1,23 @@
-/* Fleet palette, same tokens as blend-calc and pixel-peeker. */
+/* Colours come from the shared Stoatworks theme (stoatworks-theme.css, imported
+   first), so the page follows the system's light or dark setting like every fleet
+   tool. These are the tool's own names for its tokens. */
 :root {
-  --navy-900: #0a1420;
-  --navy-800: #0d1b2a;
-  --navy-700: #132437;
-  --navy-600: #1b3047;
-  --line: #223c56;
-  --line-soft: #1a2e44;
-  --text: #e8eef5;
-  --text-dim: #93a8bd;
-  --text-faint: #64798f;
-  --accent: #4cc9f0;
-  --accent-dim: #2d8fb3;
-  --danger: #ef5d5d;
-  --warn: #f2b134;
-  --ok: #5ec98a;
-  --radius: 8px;
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  color-scheme: dark;
-
-  /* Read by the vendored support footer, which otherwise inherits page colour. */
-  --sw-support-accent: var(--accent);
+  --navy-900: var(--sw-paper);
+  --navy-800: var(--sw-card);
+  --navy-700: var(--sw-tint);
+  --navy-600: var(--sw-tint);
+  --line: var(--sw-line);
+  --line-soft: var(--sw-line);
+  --text: var(--sw-ink);
+  --text-dim: var(--sw-muted);
+  --text-faint: var(--sw-faint);
+  --accent: var(--sw-accent);
+  --accent-dim: color-mix(in srgb, var(--sw-accent) 70%, var(--sw-card));
+  --danger: var(--sw-bad);
+  --warn: var(--sw-warn);
+  --ok: var(--sw-ok);
+  --radius: var(--sw-radius);
+  --mono: var(--sw-mono);
 }
 
 * {
@@ -36,8 +34,7 @@ body {
   margin: 0;
   background: var(--navy-900);
   color: var(--text);
-  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  font: 14px/1.5 var(--sw-font);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -49,13 +46,13 @@ body {
   min-height: 100%;
 }
 
+/* The navy bar (sw-bar) gives the ground and text colour; this keeps the tool's
+   own one-row density. */
 .topbar {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 20px;
-  background: var(--navy-800);
-  border-bottom: 1px solid var(--line);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -66,46 +63,21 @@ body {
   flex: 1;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  font-size: 15px;
-}
-
 .brand em {
   font-style: normal;
   font-weight: 400;
-  color: var(--text-faint);
+  letter-spacing: 0;
+  color: var(--sw-navy-ink-2);
   font-size: 12px;
   margin-left: 6px;
-}
-
-.brand-mark {
-  width: 28px;
-  height: 18px;
-  border-radius: 3px;
-  border: 1px solid var(--accent-dim);
-  background: linear-gradient(
-    90deg,
-    #bfbfbf 0 14.3%,
-    #bfbf00 14.3% 28.6%,
-    #00bfbf 28.6% 42.9%,
-    #00bf00 42.9% 57.1%,
-    #bf00bf 57.1% 71.4%,
-    #bf0000 71.4% 85.7%,
-    #0000bf 85.7% 100%
-  );
 }
 
 .btn {
   appearance: none;
   border: 1px solid var(--line);
-  background: var(--navy-700);
+  background: var(--sw-card);
   color: var(--text);
-  border-radius: 6px;
+  border-radius: var(--sw-radius-sm);
   padding: 6px 12px;
   font: inherit;
   font-size: 13px;
@@ -113,12 +85,24 @@ body {
 }
 
 .btn:hover {
-  border-color: var(--accent-dim);
+  border-color: var(--accent);
 }
 
 .btn--quiet {
   background: transparent;
   color: var(--text-dim);
+}
+
+/* On the navy bar the buttons are outlined light ones, as the theme draws them.
+   Restated here because the unlayered .btn above beats the theme's bar rules. */
+.topbar .btn {
+  background: transparent;
+  color: var(--sw-navy-ink);
+  border-color: var(--sw-navy-line);
+}
+
+.topbar .btn:hover {
+  border-color: var(--sw-accent-soft);
 }
 
 /* ---------------------------------------------------------------- layout */
@@ -167,7 +151,7 @@ body {
 
 .panel--derived {
   border-color: var(--accent-dim);
-  box-shadow: 0 0 0 1px rgba(76, 201, 240, 0.18);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .panel__head {
@@ -207,7 +191,7 @@ body {
 .chip--out {
   border-color: var(--accent-dim);
   color: var(--accent);
-  background: rgba(76, 201, 240, 0.1);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .chip--btn {
@@ -256,8 +240,8 @@ body {
   display: flex;
   align-items: stretch;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--navy-900);
+  border-radius: var(--sw-radius-sm);
+  background: var(--sw-card);
   overflow: hidden;
 }
 
@@ -325,9 +309,9 @@ body {
 
 .preset {
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--sw-radius-sm);
   padding: 3px 6px;
-  background: var(--navy-800);
+  background: var(--sw-card);
   /* Without a cap the select takes its intrinsic width from the longest option
      ("4K full container — 4096x2160") and shoves the header onto two lines. */
   max-width: 116px;
@@ -363,8 +347,8 @@ body {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-dim);
-  background: var(--navy-900);
-  border-radius: 3px;
+  background: var(--sw-tint);
+  border-radius: 4px;
   padding: 1px 4px;
 }
 
@@ -373,13 +357,14 @@ body {
 .segmented {
   display: inline-flex;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--sw-radius-sm);
   overflow: hidden;
 }
 
 .seg {
   appearance: none;
   border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--text-dim);
   font: inherit;
@@ -394,19 +379,27 @@ body {
 }
 
 .seg.on {
-  background: var(--accent-dim);
-  color: #05131c;
+  background: var(--accent);
+  color: var(--sw-on-accent);
   font-weight: 650;
 }
 
 /* ---------------------------------------------------------------- viz */
 
+/* The test card is an output surface: it sits on the stage, dark in both modes,
+   and everything drawn round it reads the stage's colours rather than the page's. */
 .viz {
   display: block;
   width: 100%;
   height: auto;
   max-height: 62vh;
   font-family: var(--mono);
+  padding: 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  --text-dim: color-mix(in srgb, var(--sw-stage-ink) 62%, var(--sw-stage));
+  --line: var(--sw-stage-line);
+  --accent: var(--sw-accent-soft);
 }
 
 /* ---------------------------------------------------------------- results */
@@ -594,19 +587,19 @@ body {
 
 .alert--warn {
   border-color: var(--warn);
-  color: #f6d79a;
-  background: rgba(242, 177, 52, 0.08);
+  color: color-mix(in srgb, var(--warn) 70%, var(--text));
+  background: color-mix(in srgb, var(--warn) 8%, var(--navy-800));
 }
 
 .alert--error {
   border-color: var(--danger);
-  color: #f8b4b4;
-  background: rgba(239, 93, 93, 0.08);
+  color: color-mix(in srgb, var(--danger) 70%, var(--text));
+  background: color-mix(in srgb, var(--danger) 8%, var(--navy-800));
 }
 
-/* The link to the tool's page on stoatworks-labs.com, after About. */
+/* The link to the tool's page on stoatworks-labs.com, just before About. */
 .topbar-link {
   font-size: 12px;
-  color: var(--text-faint);
+  color: var(--sw-navy-ink-2);
   white-space: nowrap;
 }

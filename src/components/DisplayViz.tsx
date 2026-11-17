@@ -159,7 +159,7 @@ export function DisplayViz(props: DisplayVizProps) {
 
   return (
     <svg
-      className="viz"
+      className="viz sw-stage"
       viewBox={`0 0 ${vbW} ${vbH}`}
       role="img"
       aria-label={`Display ${hPixels ?? '?'} by ${vPixels ?? '?'} pixels, aspect ratio ${
